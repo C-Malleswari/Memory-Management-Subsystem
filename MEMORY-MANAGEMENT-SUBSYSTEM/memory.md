@@ -45,9 +45,7 @@ int main()
 
     return 0;
 }
-
-
-
+/*
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -72,7 +70,339 @@ int main()
 
     return 0;
 }
+*/
+```
+## `memory/m2.c`
+// internal fragmentation using structure
+#include <stdio.h>
 
+struct WithoutPadding 
+{
+    char a;     // 1 byte
+    int b;      // 4 bytes
+    char c;     // 1 byte
+};
+
+struct WithPadding 
+{
+    int b;      // 4 bytes
+    char a;     // 1 byte
+    char c;     // 1 byte
+};
+
+int main() 
+{
+    printf("Size of struct WithoutPadding: %lu bytes\n", sizeof(struct WithoutPadding));
+    printf("Size of struct WithPadding: %lu bytes\n", sizeof(struct WithPadding));
+    return 0;
+}
+
+```
+
+##  `memory/m3.c`
+```c
+//external fragmentation
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() 
+{
+    char *block1, *block2, *block3, *large_block;
+
+    // Step 1: Allocate 3 small blocks (1 KB each) 2^10 =1024 which is equal to 1KB.
+    block1 = (char *)malloc(1024);  // 1 KB
+    block2 = (char *)malloc(1024);  // 1 KB
+    block3 = (char *)malloc(1024);  // 1 KB
+
+    if (!block1 || !block2 || !block3) 
+    {
+        printf("Memory allocation failed.\n");
+        return 1;
+    }
+
+    printf("Step 1: Allocated 3 blocks of 1 KB each.\n");
+
+    // Step 2: Free the middle block (creates a hole in memory)
+    free(block2);
+    printf("Step 2: Freed the middle block (block2).\n");
+
+    // Step 3: Try to allocate a big block (2 KB)
+    large_block = (char *)malloc(2048);  // 2 KB
+
+    if (large_block == NULL) 
+    {
+        printf("Step 3:  Could not allocate 2 KB block — possible external fragmentation.\n");
+    }
+    else 
+    {
+        printf("Step 3:  Successfully allocated 2 KB block.\n");
+        free(large_block);
+    }
+
+    // Step 4: Free remaining blocks
+    free(block1);
+    free(block3);
+
+    return 0;
+}
+
+
+```
+
+## `memory/m4.c`
+
+```c
+//use sizeof() to get know actual bytes
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() 
+{
+    int x;
+    char ch;
+    float f;
+    double d;
+
+    printf("Size of int: %lu bytes\n", sizeof(x));
+    printf("Size of char: %lu byte\n", sizeof(ch));
+    printf("Size of float: %lu bytes\n", sizeof(f));
+    printf("Size of double: %lu bytes\n", sizeof(d));
+
+    // Allocate memory for 5 integers
+    int *arr = (int *)malloc(5 * sizeof(int));
+
+    if (arr == NULL)
+   {
+        printf("Memory allocation failed!\n");
+        return 1;
+    }
+
+    printf("Size of one int: %lu bytes\n", sizeof(int));
+    printf("Allocated memory: %lu bytes (for 5 integers)\n", 5 * sizeof(int));
+
+    free(arr);  // Release memory
+
+    return 0;
+}
+
+
+```
+
+## `memory/m5.c`
+
+```c
+//to get offset value in virtual address
+#include <stdio.h>
+
+int main() 
+{
+    int virtual_address = 12088;//decimal
+    int page_size = 4096;//bytes
+
+    int offset = virtual_address % page_size;
+
+    printf("Offset inside the page: %d bytes\n", offset);
+    return 0;
+}
+
+
+```
+
+## `memory/m6.c`
+
+```c
+// to get virtual address
+// Virtual Address = (Page Number × Page Size) + Offset
+/*
+#include <stdio.h>
+
+int main()
+{
+    int page_number = 2;
+    int offset = 3896;
+    int page_size = 4096;
+
+    int virtual_address = (page_number * page_size) + offset;
+
+    printf("Virtual Address: %d (Decimal)\n", virtual_address);
+    printf("Virtual Address: 0x%X (Hexadecimal)\n", virtual_address);
+
+    return 0;
+}
+*/
+#include <stdio.h>
+
+int main() 
+{
+    int page_number, offset, page_size;
+
+    // Get inputs from the user
+    printf("Enter page size (in bytes): ");
+    scanf("%d", &page_size);
+
+    printf("Enter page number: ");
+    scanf("%d", &page_number);
+
+    printf("Enter offset (in bytes): ");
+    scanf("%d", &offset);
+
+    // Validation: offset should not exceed page size
+    if (offset >= page_size)
+    {
+        printf(" Error: Offset must be less than the page size.\n");
+        return 1;
+    }
+
+    // Calculate virtual address
+    int virtual_address = (page_number * page_size) + offset;
+
+    // Display result
+    printf("\n  Virtual Address Calculation:\n");
+    printf("Page Number: %d\n", page_number);
+    printf("Offset     : %d bytes\n", offset);
+    printf("Virtual Address: %d (Decimal)\n", virtual_address);
+    printf("Virtual Address: 0x%X (Hexadecimal)\n", virtual_address);
+
+    return 0;
+}
+
+
+```
+
+## `memory/m7.c`
+
+```c
+// to calculate physical address
+#include <stdio.h>
+
+int main() 
+{
+    int page_size = 4096; // 4KB page size
+    int page_number, offset;
+    int frame_number, physical_address;
+
+    // Step 1: A small predefined page table
+    // page_table[page_number] gives frame_number
+    int page_table[4] = {5, 3, 9, 1};  // Page 0→Frame 5, Page 1→Frame 3, etc.
+
+    // Step 2: Take user input
+    printf("Enter page number (0–3): ");
+    scanf("%d", &page_number);
+
+    printf("Enter offset (0–%d): ", page_size - 1);
+    scanf("%d", &offset);
+
+    // Step 3: Validate input
+    if (page_number < 0 || page_number >= 4 || offset >= page_size) 
+    {
+        printf(" Invalid page number or offset.\n");
+        return 1;
+    }
+
+    // Step 4: Look up frame number from page table
+    frame_number = page_table[page_number];
+
+    // Step 5: Calculate physical address
+    physical_address = (frame_number * page_size) + offset;
+
+    // Step 6: Show result
+    printf("\n  Result:\n");
+    printf("Page Number      : %d\n", page_number);
+    printf("Offset           : %d\n", offset);
+    printf("Frame Number     : %d (from page table)\n", frame_number);
+    printf("Physical Address : %d (decimal)\n", physical_address);
+    printf("Physical Address : 0x%X (hexadecimal)\n", physical_address);
+
+    return 0;
+}
+
+```
+
+## `memory/m8.c`
+
+```c
+//Implement a C program to allocate memory for an array dynamically using malloc().
+#include <stdio.h>
+#include <stdlib.h>  // Required for malloc and free
+
+int main() 
+{
+    int *arr;
+    int n, i;
+
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+
+    arr = (int *)malloc(n * sizeof(int));
+    if (arr == NULL) 
+    {
+        printf("Memory allocation failed!\n");
+        return 1;
+    }
+
+    printf("Enter %d elements:\n", n);
+    for (i = 0; i < n; i++)
+    {
+        scanf("%d", &arr[i]);
+    }
+
+    printf("the elements :\n");
+    for (i = 0; i < n; i++)
+    {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+    free(arr);
+
+    return 0;
+}
+
+
+```
+
+## `memory/m9.c`
+
+```c
+//Implement a C program to allocate memory for an array dynamically using calloc().
+#include <stdio.h>
+#include <stdlib.h>  // For calloc() and free()
+
+int main() 
+{
+    int *arr;
+    int n, i;
+
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+
+    arr = (int *)calloc(n, sizeof(int));
+
+    if (arr == NULL) 
+    {
+        printf("Memory allocation failed!\n");
+        return 1;
+    }
+
+    printf("Initial array values (from calloc):\n");
+    for (i = 0; i < n; i++) {
+        printf("%d ", arr[i]);  // All values should be 0
+    }
+    printf("\n");
+
+    printf("Enter %d elements:\n", n);
+    for (i = 0; i < n; i++) 
+    {
+        scanf("%d", &arr[i]);
+    }
+
+    printf("the elements are:\n");
+    for (i = 0; i < n; i++)
+    {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+    free(arr);
+}
 
 ```
 
@@ -1399,325 +1729,6 @@ int main()
 }
 
 
-
-```
-
-## `memory/m3.c`
-
-```c
-//external fragmentation
-#include <stdio.h>
-#include <stdlib.h>
-
-int main() 
-{
-    char *block1, *block2, *block3, *large_block;
-
-    // Step 1: Allocate 3 small blocks (1 KB each) 2^10 =1024 which is equal to 1KB.
-    block1 = (char *)malloc(1024);  // 1 KB
-    block2 = (char *)malloc(1024);  // 1 KB
-    block3 = (char *)malloc(1024);  // 1 KB
-
-    if (!block1 || !block2 || !block3) 
-    {
-        printf("Memory allocation failed.\n");
-        return 1;
-    }
-
-    printf("Step 1: Allocated 3 blocks of 1 KB each.\n");
-
-    // Step 2: Free the middle block (creates a hole in memory)
-    free(block2);
-    printf("Step 2: Freed the middle block (block2).\n");
-
-    // Step 3: Try to allocate a big block (2 KB)
-    large_block = (char *)malloc(2048);  // 2 KB
-
-    if (large_block == NULL) 
-    {
-        printf("Step 3:  Could not allocate 2 KB block — possible external fragmentation.\n");
-    }
-    else 
-    {
-        printf("Step 3:  Successfully allocated 2 KB block.\n");
-        free(large_block);
-    }
-
-    // Step 4: Free remaining blocks
-    free(block1);
-    free(block3);
-
-    return 0;
-}
-
-
-```
-
-## `memory/m4.c`
-
-```c
-//use sizeof() to get know actual bytes
-#include <stdio.h>
-#include <stdlib.h>
-
-int main() 
-{
-    int x;
-    char ch;
-    float f;
-    double d;
-
-    printf("Size of int: %lu bytes\n", sizeof(x));
-    printf("Size of char: %lu byte\n", sizeof(ch));
-    printf("Size of float: %lu bytes\n", sizeof(f));
-    printf("Size of double: %lu bytes\n", sizeof(d));
-
-    // Allocate memory for 5 integers
-    int *arr = (int *)malloc(5 * sizeof(int));
-
-    if (arr == NULL) {
-        printf("Memory allocation failed!\n");
-        return 1;
-    }
-
-    printf("Size of one int: %lu bytes\n", sizeof(int));
-    printf("Allocated memory: %lu bytes (for 5 integers)\n", 5 * sizeof(int));
-
-    free(arr);  // Release memory
-
-    return 0;
-}
-
-
-```
-
-## `memory/m5.c`
-
-```c
-//to get offset value in virtual address
-#include <stdio.h>
-
-int main() 
-{
-    int virtual_address = 12088;//decimal
-    int page_size = 4096;//bytes
-
-    int offset = virtual_address % page_size;
-
-    printf("Offset inside the page: %d bytes\n", offset);
-    return 0;
-}
-
-
-```
-
-## `memory/m6.c`
-
-```c
-// toget virtual address
-// Virtual Address = (Page Number × Page Size) + Offset
-/*
-#include <stdio.h>
-
-int main() {
-    int page_number = 2;
-    int offset = 3896;
-    int page_size = 4096;
-
-    int virtual_address = (page_number * page_size) + offset;
-
-    printf("Virtual Address: %d (Decimal)\n", virtual_address);
-    printf("Virtual Address: 0x%X (Hexadecimal)\n", virtual_address);
-
-    return 0;
-}
-*/
-#include <stdio.h>
-
-int main() 
-{
-    int page_number, offset, page_size;
-
-    // Get inputs from the user
-    printf("Enter page size (in bytes): ");
-    scanf("%d", &page_size);
-
-    printf("Enter page number: ");
-    scanf("%d", &page_number);
-
-    printf("Enter offset (in bytes): ");
-    scanf("%d", &offset);
-
-    // Validation: offset should not exceed page size
-    if (offset >= page_size) {
-        printf(" Error: Offset must be less than the page size.\n");
-        return 1;
-    }
-
-    // Calculate virtual address
-    int virtual_address = (page_number * page_size) + offset;
-
-    // Display result
-    printf("\n  Virtual Address Calculation:\n");
-    printf("Page Number: %d\n", page_number);
-    printf("Offset     : %d bytes\n", offset);
-    printf("Virtual Address: %d (Decimal)\n", virtual_address);
-    printf("Virtual Address: 0x%X (Hexadecimal)\n", virtual_address);
-
-    return 0;
-}
-
-
-```
-
-## `memory/m7.c`
-
-```c
-// to calculate physical address
-#include <stdio.h>
-
-int main() 
-{
-    int page_size = 4096; // 4KB page size
-    int page_number, offset;
-    int frame_number, physical_address;
-
-    // Step 1: A small predefined page table
-    // page_table[page_number] gives frame_number
-    int page_table[4] = {5, 3, 9, 1};  // Page 0→Frame 5, Page 1→Frame 3, etc.
-
-    // Step 2: Take user input
-    printf("Enter page number (0–3): ");
-    scanf("%d", &page_number);
-
-    printf("Enter offset (0–%d): ", page_size - 1);
-    scanf("%d", &offset);
-
-    // Step 3: Validate input
-    if (page_number < 0 || page_number >= 4 || offset >= page_size) 
-    {
-        printf(" Invalid page number or offset.\n");
-        return 1;
-    }
-
-    // Step 4: Look up frame number from page table
-    frame_number = page_table[page_number];
-
-    // Step 5: Calculate physical address
-    physical_address = (frame_number * page_size) + offset;
-
-    // Step 6: Show result
-    printf("\n  Result:\n");
-    printf("Page Number      : %d\n", page_number);
-    printf("Offset           : %d\n", offset);
-    printf("Frame Number     : %d (from page table)\n", frame_number);
-    printf("Physical Address : %d (decimal)\n", physical_address);
-    printf("Physical Address : 0x%X (hexadecimal)\n", physical_address);
-
-    return 0;
-}
-
-```
-
-## `memory/m8.c`
-
-```c
-//Implement a C program to allocate memory for an array dynamically using malloc().
-#include <stdio.h>
-#include <stdlib.h>  // Required for malloc and free
-
-int main() 
-{
-    int *arr;
-    int n, i;
-
-    printf("Enter number of elements: ");
-    scanf("%d", &n);
-
-    arr = (int *)malloc(n * sizeof(int));
-    if (arr == NULL) 
-    {
-        printf("Memory allocation failed!\n");
-        return 1;
-    }
-
-    printf("Enter %d elements:\n", n);
-    for (i = 0; i < n; i++)
-    {
-        scanf("%d", &arr[i]);
-    }
-
-    printf("the elements :\n");
-    for (i = 0; i < n; i++)
-    {
-        printf("%d ", arr[i]);
-    }
-    printf("\n");
-    free(arr);
-
-    return 0;
-}
-
-
-```
-
-## `memory/m9.c`
-
-```c
-//Implement a C program to allocate memory for an array dynamically using calloc().
-#include <stdio.h>
-#include <stdlib.h>  // For calloc() and free()
-
-int main() 
-{
-    int *arr;
-    int n, i;
-
-    printf("Enter number of elements: ");
-    scanf("%d", &n);
-
-    arr = (int *)calloc(n, sizeof(int));
-
-    if (arr == NULL) 
-    {
-        printf("Memory allocation failed!\n");
-        return 1;
-    }
-
-    printf("Initial array values (from calloc):\n");
-    for (i = 0; i < n; i++) {
-        printf("%d ", arr[i]);  // All values should be 0
-    }
-    printf("\n");
-
-    printf("Enter %d elements:\n", n);
-    for (i = 0; i < n; i++) 
-    {
-        scanf("%d", &arr[i]);
-    }
-
-    printf("the elements are:\n");
-    for (i = 0; i < n; i++)
-    {
-        printf("%d ", arr[i]);
-    }
-    printf("\n");
-    free(arr);
-}
-
-
-```
-
-## `memory/mapped_file.txt`
-
-```
-Hello from mmap!
-```
-
-## `memory/mymappedfile.txt`
-
-```
-Hello C. Malleswari! This is written using mmap().
 ```
 
 ## `memory/program.c`
