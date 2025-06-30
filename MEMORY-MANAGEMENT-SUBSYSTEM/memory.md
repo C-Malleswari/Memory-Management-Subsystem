@@ -1,9 +1,4 @@
-# Source Code Listing
-
-## `memory/file.txt`
-
-```
-It surrounds us with beauty, peace, and life itself. From the gentle rustling of leaves in the wind to the powerful roar of oceans and waterfalls, nature speaks in a language that touches the soul. It provides us with fresh air, clean water, food, and countless resources to survive. Beyond its utility, nature inspires creativity, offers healing, and teaches us balance. But in return, it asks for respect and care. Preserving nature is not just an environmental responsibility — it’s a duty to future generations and to the earth that sustains us all.
+# MEMORY  MANAGEMENT SUBSYSTEM
 
 ```
 
