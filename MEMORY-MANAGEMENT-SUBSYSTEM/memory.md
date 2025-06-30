@@ -72,8 +72,9 @@ int main()
 }
 */
 ```
-```
+
 ## `memory/m2.c`
+```c
 // internal fragmentation using structure
 #include <stdio.h>
 
@@ -98,7 +99,6 @@ int main()
     return 0;
 }
 
-```
 ```
 ##  `memory/m3.c`
 ```c
