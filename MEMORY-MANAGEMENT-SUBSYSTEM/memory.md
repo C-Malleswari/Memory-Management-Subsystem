@@ -72,6 +72,7 @@ int main()
 }
 */
 ```
+
 ## `memory/m2.c`
 // internal fragmentation using structure
 #include <stdio.h>
